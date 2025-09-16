@@ -1,15 +1,5 @@
 # WEEK2 Notes
 
-
-# Heading1
-## Heading2
-### Heading3
-#### Heading4
-##### Heading5
-###### Heading6
-
-**bold text**
-
 ## Stoke: Modify Stroke Properties
 ## Shapes: circle/rectangle/triangle/elipse/line to create different shapes
 ## (x,y,diamter/size): when writing number behind a shape, its always its location (x,y) and then how big the shape is.
