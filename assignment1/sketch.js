@@ -1,7 +1,6 @@
 function setup() {
   createCanvas(615, 750);
   background("rgba(190, 173, 140, 1)"); // background color
-
 }
 
 function draw() {
