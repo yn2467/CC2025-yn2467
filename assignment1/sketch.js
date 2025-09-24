@@ -3,6 +3,10 @@ function setup() {
   background("rgba(190, 173, 140, 1)"); // background color
 }
 
+function canvasResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
 function draw() {
   //drawing the biggest triangle
   noStroke();
