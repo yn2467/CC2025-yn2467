@@ -17,45 +17,11 @@ Markdown Cheatsheet (from [https://www.markdownguide.org/cheat-sheet/](https://w
 
 **bold text**
 
-*italicized text*
+#### Process of the Week:
 
-~~strikethrough text~~
+I started with the plain background and the biggest center triangle.
 
-Ordered List:
-1. First item
-2. Second item
-3. Third item
+Then I head with the lower-left bottom shapes but found it really frustrating using only vertex. I wonder there *MUST* be a method that can allow to rotate shapes, since most of the shapes in my scene is rects and triangle.
 
-Unordered List:
-- First item
-- Second item
-- Third item
+I use the pop and push function ---- where I understands it as creating a new layer after each pop. This sets the foundation of me using the rotation function. I setup a specific width and length for different shapes, allowing me to control them in different shapes, then I make sure they are rotating with a center point(this is also how I define where they will be located). With everything setup, they are rotated a specific angle that are vried whithin different shapes.
 
-`short code block`
-
-```
-extended code block
-fun() {
-  return 0
-}
-```
-
-Link:  
-[linked text](https://www.example.com)
-
-
-Image with url:  
-![image description](https://dm-gy-6063-2024f-b.github.io/assets/homework/02/clark-espaco-modulado-00.jpg)
-
-
-Image on repo:  
-![image description](./file-name.jpg)
-
-
-To start a new line, add two spaces at the end of a line, like this:  
-this is a new line.
-
-
-To start a new paragraph, leave an empty line between two lines of text.
-
-This is a new paragraph.
