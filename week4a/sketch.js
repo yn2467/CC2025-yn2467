@@ -17,16 +17,21 @@ function setup() {
 function draw() {
   background(220);
 
+  for(let x = 50; x<width-50; x+=100){
+    circle(x,50,100);
+  
   push();
   //everthing within this push/pop block
   //will be centered, with 0,0 as the center
-  translate(100,100);
+  translate(x,50);
 
   strokeWeight(3);
   fill("#c6f9f8ff");
   circle(0,0,100);
   circle(-10,-15,10);
   circle(15,-10,10);
-  arc(0,0,50,50,0,PI);
+  let happiness = map(x,0,width,-25,25);
+  arc(0,0,50,50,radians(0-happiness),radians(180+happiness));
   pop();
+  }
 }

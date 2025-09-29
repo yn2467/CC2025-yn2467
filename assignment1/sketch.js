@@ -1,5 +1,5 @@
 function setup() {
-  createCanvas(615, 750);
+  createCanvas(windowWidth, windowHeight);
   background("rgba(190, 173, 140, 1)"); // background color
 }
 

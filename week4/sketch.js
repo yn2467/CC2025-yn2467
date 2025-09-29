@@ -24,7 +24,34 @@ function draw() {
   //Anything enclosed whitin push and pop
   //only affects the shapes within the enclosure
   push(); //push indicates the begging of an isolated block
-  fill("yellow");
+  
+  // > = greater than
+  // < = less than
+  // == = equal to
+  // != = not equal to
+  // >= = greater than or equal to
+  // <= = less than or equal to
+  //&& = and
+  //|| = or
+
+  if(mouseX>width/2 && mouseY>height/2){ //if the test inside the () is true
+    //run this code
+    fill("pink");
+  } else if(mouseX<width/2 && mouseY>height/2){ //else if this test is true
+    //run this other code
+    fill("lightgreen");
+  } else { //otherwise...
+    //run this other code
+    fill("lightblue");
+  }
+
+  if(mouseIsPressed == true){ //else if this test is true
+    //run this other code
+    fill("red");
+  }
+  //mouseIsPressed is a system variable that switches
+  //from false to true when mouse is pressed
+
   translate(width/2, height/2);
   let agnle;
   //map is a function that scales
@@ -63,3 +90,4 @@ function draw() {
   textSize(15);
   fill(color = '#ffffff');
 } 
+/////////end of translate/draw/mapping example//////////
