@@ -1,19 +1,3 @@
-# Heading1
-## Heading2
-### Heading3
-#### Heading4
-##### Heading5
-###### Heading6
-
-
-
-Image on repo:  
-![image description](./file-name.jpg)
-
-
-To start a new line, add two spaces at the end of a line, like this:  
-this is a new line.
-
 ### THE Solar Clock
 #### Creation Process
 To start a new paragraph, leave an empty line between two lines of text.
