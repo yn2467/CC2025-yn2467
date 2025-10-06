@@ -27,7 +27,7 @@ function draw() {
     let s = map(noise(x * 0.05, y * 0.05, t + 1000), 0, 1, 0.5, 1.2);//scale randomness
 
     push();
-    translate(x + offsetX, y + offsetY);
+    translate(x + offsetX, y + offsetY); //adding noise to shapes
     translate(50, 50); //move origin to star’s center
     scale(s);
     translate(-50, -50); //move back

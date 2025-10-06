@@ -36,104 +36,148 @@ function setup(){
 function draw(){
   background(12);
 
-  // —— 1. 把坐标原点移到画布中心，让(0,0)是太阳位置 ——
+  // 1. making the center of canvas the location of sun
   translate(cx, cy);
 
-  // —— 2. 绘制太阳 ——
+  // 2. draw the sun
   noStroke();
+  drawingContext.shadowBlur = 20;
+  drawingContext.shadowColor = color("#ffae00ff");
   fill(255, 180, 40);
   ellipse(0, 0, 24, 24);
 
-  // —— 3. 可选：绘制所有轨道圈 ——
+  // 3. draw out all orbits
   if (showOrbits){
     noFill();
     stroke(80);
+    // drawing out each orbit for each planets. The diameter 
+    // of each orbit will be limited by the preset radii.
     for (let i = 0; i < radii.length; i++){
       ellipse(0, 0, radii[i]*2, radii[i]*2);
+      drawingContext.shadowBlur = 40;
+      drawingContext.shadowColor = color("#5e82ebff");
     }
   }
 
-  // —— 4. 绘制所有行星 ——
+  // 4. draw all the planets
+  
+  // ***KEY STEP***
+  // This loop is the key, controlling the planet's movement. 
+  // All notes below is for me myself to better remembering the code.
+  //-----------------------------------------------------------------------------
   for (let i = 0; i < names.length; i++){
-    let P = periodD[i];              // 公转周期（天）
-    let R = radii[i];                // 轨道半径
-    let laps = simDays / P;          // 已经转了多少圈
-    let progress = laps % 1;         // 当前圈进度 0~1
-    let ang = TWO_PI * progress;     // 当前角度
+    // doing all following code for each planets within this array "names"
+    // when i < the number of names, keep going until go through all of them
+    
+    let P = periodD[i];              
+    // get the revolved period of each planet
+    
+    let R = radii[i];               
+    // get the planet's radius
+    
+    let laps = simDays / P;          
+    // *IMPORTANT* simdays is how many days have past. Where P is how many days
+    // it take for the planet to rotate a full lap.
+    // SO simDays/P = how many laps had it rotated.
+    // eg.: simDays = 365 for earth is 1 lap in total
+    
+    let progress = laps % 1;      
+    // %1 here means get the value after decimals, since I only care about the
+    // pencentage. laps = 3.27 after % 1 gives me .27. Which indicates it
+    // had passed 27% of this current lap.
+    
+    let ang = TWO_PI * progress;   
+    // this is to calculate the angle of planet.
+    // 2 PI indicates 360 degree, multiplied by progress, given its current angle
 
     let x = R * cos(ang);
     let y = R * sin(ang);
+    // converting current angle and radius into specific coordinates.
+    // I understand this like drawing a circle on paper, "R" is the size
+    // of the circle, "ang" is a position on the circle, and 
+    // "cos(ang)"/"sin(ang" calculates the current x and y coordinates.
+    // with every frame, the coordinate is refreshed, therefore creating
+    // the animation.
 
-    // 行星点
+    // the ellipse circles
     noStroke();
     let size = (i >= 4) ? 10 : 8;
     fill(180 + i*8, 200 - i*10, 255 - i*12);
     ellipse(x, y, size, size);
 
-    // 标签
-    let years = P / 365.0;
-    let days  = P;
-    let hours = P * 24.0;
+    // info above all planets (year, day, hrs)
+    let totalyears = simDays/365;
+    let totaldays  = simDays;
+    let totalhours = simDays * 24.0;
     let whole = int(laps);
     let pct   = nf(progress * 100, 1, 1) + "%";
 
-    // 标签位置（行星外侧一点）
+    // label location, a little next to each planet
     let tx = x + 12 * cos(ang);
     let ty = y + 12 * sin(ang);
 
     fill(230);
     noStroke();
-    textAlign(LEFT, CENTER);
+  
     let info1 = names[i] + "  " 
-              + nf(years,1,2) + "年 / " 
-              + nf(days,1,2)  + "天 / " 
-              + nf(hours,1,0) + "小时";
-    let info2 = "已转 " + whole + " 圈   当前圈进度 " + pct;
+              + nf(totalyears,1,2) + "Y / " 
+              + nf(totaldays,1,2)  + "D / " 
+              + nf(totalhours,1,2) + "Hr";
+    let info2 = "rotated " + whole + " laps; current lap: " + pct;
 
-    // 标签两行文字
+    // add label info next to the planets
     text(info1, tx + 6, ty - 8);
     text(info2, tx + 6, ty + 8);
 
-    // 连线
-    stroke(120);
+    // draw thr strokes indicates each planet
+    // making it more obvious which info belongs to which planet
+    // I lost myself finding how to make the line perfectly 
+    // pointing the label while the planet is rotating, I decide to 
+    // go with this for now.
+    stroke(300);
     line(x, y, tx, ty);
   }
-
-  // —— 5. 画顶部状态栏（要回到左上角坐标系） ——
-  // 因为我们现在的原点在中心，要回到左上角就反向平移
-  push(); // 保存当前中心坐标系
-  translate(-cx, -cy); // 相当于回到左上角坐标
+  //-----------------------------------------------------------------------------
+  
+  // 5. drawing the status bar above
+  // need to move the center back to left top corner
+  push(); 
+  translate(-cx, -cy); // translate
   fill(220);
   noStroke();
   textSize(16);
   text("THE Solar Clock", 16, 24);
 
+
   textSize(12);
+  // Reference all info from prviouse definitions. 
   let stepInfo = paused ? "pause" : (baseDaysPerFrame * speedMult).toFixed(3) + " day/f";
   text("speed: " + nf(speedMult,1,2) + "x |  " + stepInfo, 16, 46);
   text("CONTROLS: ↑SPEED_UP  ↓SPEED_DOWN  SPACE:PAUSE  R:RESET", 16, 66);
-  pop(); // 恢复回中心坐标
+  pop();
   
 
-  // —— 6. 时间推进（如果没暂停） ——
+  // 6. time Continues (if the scene is not paused)
   if (!paused){
     simDays += baseDaysPerFrame * speedMult;
   }
 }
 
-// —— 7. 键盘控制 ——
-// ↑ 加速、↓ 减速、空格 暂停/继续、R 重置
+// 7. Keyboard control
+// define each key control using keyCode function
+// keyCode function on p5js: https://p5js.org/reference/p5/keyCode/
 function keyPressed(){
   if (keyCode === UP_ARROW){
-    if (speedMult < 1024) speedMult *= 2;
+    if (speedMult < 1024) speedMult *= 2; // I set a maximum of 1024x of speed
   } 
   else if (keyCode === DOWN_ARROW){
-    if (speedMult > 0.125) speedMult /= 2;
+    if (speedMult > 0.125) speedMult /= 2; // Also, minimum of 0.125x
   } 
-  else if (key === ' '){
-    paused = !paused;
+  else if (key === ' '){ // if space bar is pressed, then pause
+    paused = !paused; 
   } 
-  else if (key === 'R' || key === 'r'){
+  else if (key === 'R' || key === 'r'){ //reset the entire scene using R key
+    // Never forget to reset everything into default after reset
     simDays = 0;
     speedMult = 1;
     paused = false;
