@@ -24,7 +24,7 @@ let radii   = [   60,       90,     120,     150,      200,       240,      280,
 let periodD = [ 87.969,  224.701, 365.256, 686.980, 4332.589, 10759.22, 30688.5,   60182 ];
 
 function setup(){
-  createCanvas(800, 800);
+  createCanvas(windowWidth, windowHeight);
   // calculating center of x and y axis
   cx = width / 2;
   cy = height / 2;
