@@ -4,6 +4,8 @@
 // according to hours,day,and years, another is the speed up and down function.
 // Earth days are used as a standard unit
 
+// Here I want to set up basic definitions of my codes, where moset of the 
+// defs here will be used in later codes.
 let cx, cy;                 // the center of canvas
 let simDays = 0;            // time simulation, unit = days
 let baseDaysPerFrame = 0.2; // time that past per each frame, unit = days
@@ -13,6 +15,9 @@ let showOrbits = true;      // show the orbit graph or not
 
 // Even though we have not learned yet, but in order to control each planet
 // individually, I have to use an array to store their data seperately. 
+// I got this idea from my highschool AP Java course... I have to relearn it
+// since its a old memory of mine.
+
 // The youtube tutorial for array I watched 
 // by The Coding Train: https://www.youtube.com/watch?v=VIQoUghHSxU
 
@@ -20,8 +25,8 @@ let showOrbits = true;      // show the orbit graph or not
 // Revolve periods in days are given by chatGPT, reference to
 // NASA Planetary Fact Sheet: https://science.nasa.gov/solar-system/planets/.
 let names   = ["Mercury","Venus","Earth","Mars","Jupiter","Saturn","Uranus","Neptune"];
-let radii   = [   60,       90,     120,     150,      200,       240,      280,       320 ];
-let periodD = [ 87.969,  224.701, 365.256, 686.980, 4332.589, 10759.22, 30688.5,   60182 ];
+let radii   = [       60,     90,    120,   150,      200,     240,     280,     320 ];
+let periodD = [   87.969,224.701,365.256,686.980,4332.589,10759.22, 30688.5,   60182 ];
 
 function setup(){
   createCanvas(windowWidth, windowHeight);
@@ -40,6 +45,8 @@ function draw(){
   translate(cx, cy);
 
   // 2. draw the sun
+  // The glow effect I had explained in my last assignment and
+  // in class.
   noStroke();
   drawingContext.shadowBlur = 20;
   drawingContext.shadowColor = color("#ffae00ff");
@@ -164,7 +171,10 @@ function draw(){
 }
 
 // 7. Keyboard control
-// define each key control using keyCode function
+// I want to use Keyboard control my speedUP and speedDOWN function.
+// I have a previous knowledge of key control function in Python,
+// therefore I believe key control function must exist within p5js.
+// I looked up keyPressed() function within p5js library. Link is down below
 // keyCode function on p5js: https://p5js.org/reference/p5/keyCode/
 function keyPressed(){
   if (keyCode === UP_ARROW){
