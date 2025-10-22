@@ -1,9 +1,5 @@
 ### THE Solar Clock
 #### Creation Process
-To start a new paragraph, leave an empty line between two lines of text.
-
-This is a new paragraph.
-
 This week is me really challenging myself with for loops and all comparison and definition symbols. 
 
 I started this project with an idea of me really insterested in astronomy, and decided to creat a solar clock myself. 
