@@ -10,7 +10,5 @@ The for loops are really frustrated me a lot. Since I use P (planet fixed revolv
 
 I wrote most of my notes whithin the code. Please check if needed. 
 
-Very gald have done this prj. 
-
 Yichen
 
