@@ -1,61 +1,12 @@
-# template
+### Assignment 4, a Pixel Burger Factory
 
----
+#### My process:
 
-This is a README file that can be used to describe and document your assignment.
+I decided to make a pixelated burger facotry for my this week's assignment. I was playing an old Zelda game on GameBoy, seeing its extensive use of pixel art, I decide to recreate this within p5js.
 
-Markdown Cheatsheet (from [https://www.markdownguide.org/cheat-sheet/](https://www.markdownguide.org/cheat-sheet/)):
+I have a confess that I had simplified the burgers a lot in to layered structures like now. Since my brain is bruning out when working on the display() function, figuring out how will each burger display as wanted.
 
----
+It was really confusing for me when I first self-learn(since I am not in class last week) using the class function. It was kinda a struggle when writing the display() function, assorting all layers of burgers together. I was drawing out a few rects at first, but it really turns out to be very weired. Until I realize I have to padded each layers a little bit to creat the layered effect to make the whole as looked as a burger.
+For loop is also my weekness as well, I just feel like my brain is forgetting each variables and what each line of code means when I move on to the next line. 
 
-# Heading1
-## Heading2
-### Heading3
-#### Heading4
-##### Heading5
-###### Heading6
-
-**bold text**
-
-*italicized text*
-
-~~strikethrough text~~
-
-Ordered List:
-1. First item
-2. Second item
-3. Third item
-
-Unordered List:
-- First item
-- Second item
-- Third item
-
-`short code block`
-
-```
-extended code block
-fun() {
-  return 0
-}
-```
-
-Link:  
-[linked text](https://www.example.com)
-
-
-Image with url:  
-![image description](https://dm-gy-6063-2024f-b.github.io/assets/homework/02/clark-espaco-modulado-00.jpg)
-
-
-Image on repo:  
-![image description](./file-name.jpg)
-
-
-To start a new line, add two spaces at the end of a line, like this:  
-this is a new line.
-
-
-To start a new paragraph, leave an empty line between two lines of text.
-
-This is a new paragraph.
+I decide to use noise for some further cool effect since the whole process will look too steady and boring. It turns out pretty nice and I liked the final product.
