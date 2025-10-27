@@ -6,6 +6,8 @@
 
 // Here I want to set up basic definitions of my codes, where moset of the 
 // defs here will be used in later codes.
+
+//FIELDS:
 let cx, cy;                 // the center of canvas
 let simDays = 0;            // time simulation, unit = days
 let baseDaysPerFrame = 0.2; // time that past per each frame, unit = days
