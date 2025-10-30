@@ -35,7 +35,6 @@ function draw() {
 
   // some instructions!
   fill(240);
-  textAlign(CENTER, CENTER);
   textSize(16);
   text("Click for a new BURGERRRR!!", width / 2, height - 24);
 }
