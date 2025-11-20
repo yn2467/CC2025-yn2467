@@ -1,61 +1,10 @@
-# template
+### WEEK5 projection mapping notes
+#### No.1 Breathing cube
 
----
+  First I call size(400, 400) to make canvas, then colorMode(HSB, 360, 100, 100, 100) for easy hue/brightness control, and noStroke() to keep shapes clean. I create a time variable phase, and every draw() I increase it a little. 
 
-This is a README file that can be used to describe and document your assignment.
+  I use a breathing value by sin(phase) * 0.5 + 0.5, so result is 0..1. I use lerp() between two sizes (like 110 and 150) to scale a square smoothly, and use lerpColor(orangeLight, orangeDark, breathe) to fade color at same rhythm. 
 
-Markdown Cheatsheet (from [https://www.markdownguide.org/cheat-sheet/](https://www.markdownguide.org/cheat-sheet/)):
-
----
-
-# Heading1
-## Heading2
-### Heading3
-#### Heading4
-##### Heading5
-###### Heading6
-
-**bold text**
-
-*italicized text*
-
-~~strikethrough text~~
-
-Ordered List:
-1. First item
-2. Second item
-3. Third item
-
-Unordered List:
-- First item
-- Second item
-- Third item
-
-`short code block`
-
-```
-extended code block
-fun() {
-  return 0
-}
-```
-
-Link:  
-[linked text](https://www.example.com)
-
-
-Image with url:  
-![image description](https://dm-gy-6063-2024f-b.github.io/assets/homework/02/clark-espaco-modulado-00.jpg)
-
-
-Image on repo:  
-![image description](./file-name.jpg)
-
-
-To start a new line, add two spaces at the end of a line, like this:  
-this is a new line.
-
-
-To start a new paragraph, leave an empty line between two lines of text.
-
-This is a new paragraph.
+  With rectMode(CENTER) I draw multiple concentric rounded rectangles in a loop; each ring has small phase offset sin(phase + i*0.75) so rings don’t move totally same, more organic. The rectangle is drawn by rect(cx, cy, w, h, 18); the last parameter makes round corner, more friendly for projection. 
+  
+  I also add a center pulse using ellipse(cx, cy, glowSize, glowSize) where glowSize = lerp(22, 42, breathe), and its brightness uses fill(h, s, lerp(60,100,breathe), 90). background(0) each frame clears old image. The combination of sin(), lerp(), lerpColor(), and ring loop makes a cube feeling like inhale/exhale. No mouse input, only time-driven animation, very stable for mapping.

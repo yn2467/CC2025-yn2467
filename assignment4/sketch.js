@@ -157,7 +157,7 @@ class Burger {
   // p: size of each pixel block
   drawRow(pxCount, yOffset, col, p) { 
     push();
-    fill(col); 
+    fill(col);
     let totalW = pxCount * p; // total width of this row
     let xStart = -totalW / 2; // starting x position to center the row
     for (let i = 0; i < pxCount; i++) { // draw each pixel block

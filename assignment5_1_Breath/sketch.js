@@ -5,7 +5,8 @@
 // ynB stands for "yichen_Breath"
 
 // define canvas size
-let ynB_canvasW = 400, ynB_canvasH = 400;
+let ynB_canvasW = 400;
+let ynB_canvasH = 400;
 
 // define variables for breathing animation
 let ynB_phase = 0;          // defines current phase of breathing
