@@ -1,98 +1,112 @@
-let video; //store camera input
-let poseML5; //store ml5 pose model
-let poses=[]; //store detected poses
+let video;
+let poseML5;
+let poses = [];
 
-// in order to calculate velocity, we need to store previous positions
-let prevLeftWristX = 0; //previous x position of left wrist
-let prevLeftWristY = 0; //previous y position of left wrist
+let prevLeftWristX = 0;
+let prevLeftWristY = 0;
 
-let width = windowWidth;
-let height = windowHeight;
+let ripples = [];
+let speedThreshold = 10;
 
-let ripples = []; //array to store ripple objects(from the Ripple class)
-let speedThreshold = 10; //threshold, only create ripple if wrist speed exceeds this value
-
-function preload() { //load bodypose model
+function preload() {
   poseML5 = ml5.bodyPose();
 }
 
 function setup() {
-  createCanvas(width, height);
+  createCanvas(windowWidth, windowHeight);
   video = createCapture(VIDEO);
-  video.size (width, height);
+  video.size(width, height);
   video.hide();
 
-  bodyPose.detectStart(video, gotPoses);
+  poseML5.detectStart(video, gotPoses);
   console.log("PoseNet initialized. Waiting for detection.");
 }
 
 function draw() {
   image(video, 0, 0, width, height);
+  loadPixels();
 
   if (poses.length > 0) {
-    let leftWrist = poses[0].keypoints[9].position; //getting left wrist position
-    // I first used poses[0] itself, which is not a position.
-    // poses[0] is the first detected person，keypoints[9] is the left wrist keypoint.
-    // .position gets the position object with x and y properties.
-    let currentX = leftWrist.x;
-    let currentY = leftWrist.y;
+    if (poses[0].left_wrist) {
+      let leftWrist = poses[0].left_wrist;
+      let currentX = leftWrist.x;
+      let currentY = leftWrist.y;
 
-    //update previous wrist positions for next frame
-    let D = dist(currentX, currentY, prevLeftWristX, prevLeftWristY); //calculate distance moved since last frame
-    if (D > speedThreshold) { //if distance moved is greater than threshold
-      let newripple = new Ripple(currentX, currentY, D); //create new ripple at current wrist position
-      ripples.push(newripple); //adding ripple to array
-    }
-    prevLeftWristX = currentX;
-    prevLeftWristY = currentY;
-    //this two line of code ensure that in the next frame, we can calculate the distance moved again
-  }
-  //
-  for (let i = ripples.length -1; i >=0; i--){
-    ripples[i].display(); 
-    if (ripples[i].isFinished()){
-      // splice function is used to remove elements from an array.
-      // p5js reference: https://p5js.org/reference/#/p5.Array/splice
-      // in this case, when a ripple is finished (alpha <=0), will remove it from the array
-      // this is used to prevent the array from growing indefinitely and consuming more memory
-      ripples.splice(i, 1); //remove finished ripples from array
+      let D = dist(currentX, currentY, prevLeftWristX, prevLeftWristY);
+      if (D > speedThreshold) {
+        let newripple = new Ripple(currentX, currentY, D);
+        ripples.push(newripple);
+      }
+
+      prevLeftWristX = currentX;
+      prevLeftWristY = currentY;
     }
   }
+
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    ripples[i].applyWaveDistortion(pixels, width, height);
+    if (ripples[i].isFinished()) {
+      ripples.splice(i, 1);
+    }
+  }
+
+  updatePixels();
 }
 
-function gotPoses(results){ //storing the detected poses
-  poses = results;
-  console.log("Pose Detected!");
-}
-
-//creating the Ripple class. 
 class Ripple {
-  //Identifying the properties of a ripple.
-  constructor(x, y, initialSpeed) { //the center posistion x,y, and the force of the ripple (speed)
+  constructor(x, y, initialSpeed) {
     this.x = x;
     this.y = y;
-    this.r = 0; //the radius starts from 0
-    this.alpha = 255; //initial alpha value, from 0-255
-    
-    this.rGrowSpeed = map(initialSpeed, 0, 50, 2, 10); 
-    //the growth speed of the radius, mapped from the initialSpeed,
-    //faster the initial speed, faster the growth speed
+    this.r = 0;
+    this.alpha = 255;
+    this.rGrowSpeed = map(initialSpeed, 0, 20, 2, 10);
   }
-  
-  display() {
-    if (this.alpha <= 0) {
-      return; //if alpha is 0 or less, do not display the ripple
+
+  applyWaveDistortion(pixels, w, h) {
+    let originalPixels = pixels.slice();
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let dx = x - this.x;
+        let dy = y - this.y;
+        let distToWave = sqrt(dx * dx + dy * dy);
+
+        let waveWidth = 60;
+        let distFromWave = abs(distToWave - this.r);
+
+        if (distFromWave < waveWidth && distToWave > 0) {
+          let waveStrength = (1 - distFromWave / waveWidth) * (this.alpha / 255);
+          let displacement = sin((distToWave - this.r) / waveWidth * PI) * waveStrength * 25;
+
+          let angle = atan2(dy, dx);
+          let newX = x + cos(angle) * displacement;
+          let newY = y + sin(angle) * displacement;
+
+          newX = constrain(newX, 0, w - 1);
+          newY = constrain(newY, 0, h - 1);
+
+          let sourceIndex = (floor(newY) * w + floor(newX)) * 4;
+          let targetIndex = (y * w + x) * 4;
+
+          if (sourceIndex >= 0 && sourceIndex < originalPixels.length - 3) {
+            pixels[targetIndex] = lerp(originalPixels[targetIndex], originalPixels[sourceIndex], waveStrength * 0.8);
+            pixels[targetIndex + 1] = lerp(originalPixels[targetIndex + 1], originalPixels[sourceIndex + 1], waveStrength * 0.8);
+            pixels[targetIndex + 2] = lerp(originalPixels[targetIndex + 2], originalPixels[sourceIndex + 2], waveStrength * 0.8);
+            pixels[targetIndex + 3] = originalPixels[targetIndex + 3];
+          }
+        }
+      }
     }
-    noFill();
-    stroke(255, this.alpha); //a white stroke with the current alpha value
-    strokeWeight(3);
-    ellipse(this.x, this.y, this.r * 2);
-    this.r += this.rGrowSpeed; //increase the radius by the growth speed
-    this.alpha -= 1; //gradually decrease the alpha value to make sure the ripple fades out
+
+    this.r += this.rGrowSpeed;
+    this.alpha -= 2;
   }
 
   isFinished() {
-    return this.alpha <= 0; //check if the ripple is dead (alpha is 0 or less)
+    return this.alpha <= 0;
   }
 }
 
+function gotPoses(results) {
+  poses = results;
+}

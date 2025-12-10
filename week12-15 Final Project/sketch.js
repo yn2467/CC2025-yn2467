@@ -1,56 +1,101 @@
+// This project uses ml5.js BodyPose model to detect 
+// the left wrist position from a camera input.
+// THe basic Idea is when the left wrist moves quickly, 
+// a ripple effect is created at the wrist position.
+// The ripple will expands and fades out over time.
+
+//After completeting the basic Ripple effect,
+//I tuned some parameters to make the effect more visually appealing.
+//1. For example, I adjusted the speed threshold to 10,
+//1. so that ripples are created only when the wrist moves faster than this value.
+//2. I also mapped the ripple growth speed to the initial wrist speed,
+//2. so that faster wrist movements create faster expanding ripples.
+//3. I also feel like there is too much ripples generating
+//3. I set a CD time of 200 ms, which mean 5 ripples per second at most.
+//4. Add in both hands.
+
 let video; //store camera input
 let poseML5; //store ml5 pose model
-let poses=[]; //store detected poses
+let poses = []; //store detected poses
 
 // in order to calculate velocity, we need to store previous positions
 let prevLeftWristX = 0; //previous x position of left wrist
 let prevLeftWristY = 0; //previous y position of left wrist
-
-let width = windowWidth;
-let height = windowHeight;
+let prevRightWristX = 0; //previous x position of right wrist
+let prevRightWristY = 0; //previous y position of right wrist
 
 let ripples = []; //array to store ripple objects(from the Ripple class)
 let speedThreshold = 10; //threshold, only create ripple if wrist speed exceeds this value
 
-function preload() { //load bodypose model
+let lastLeftRippleTime = 0; //the time when the last left ripple was created
+let lastRightRippleTime = 0; //the time when the last right ripple was created
+let rippleCD = 100; //minimum time (in milliseconds) between a ripple creations
+
+function preload() {
+  //load bodypose model
   poseML5 = ml5.bodyPose();
 }
 
 function setup() {
-  createCanvas(width, height);
+  createCanvas(windowWidth, windowHeight);
   video = createCapture(VIDEO);
-  video.size (width, height);
+  video.size(width, height);
   video.hide();
 
-  bodyPose.detectStart(video, gotPoses);
+  poseML5.detectStart(video, gotPoses);
   console.log("PoseNet initialized. Waiting for detection.");
 }
 
 function draw() {
+  background(0);
   image(video, 0, 0, width, height);
 
   if (poses.length > 0) {
-    let leftWrist = poses[0].keypoints[9].position; //getting left wrist position
-    // I first used poses[0] itself, which is not a position.
-    // poses[0] is the first detected person，keypoints[9] is the left wrist keypoint.
-    // .position gets the position object with x and y properties.
-    let currentX = leftWrist.x;
-    let currentY = leftWrist.y;
-
-    //update previous wrist positions for next frame
-    let D = dist(currentX, currentY, prevLeftWristX, prevLeftWristY); //calculate distance moved since last frame
-    if (D > speedThreshold) { //if distance moved is greater than threshold
-      let newripple = new Ripple(currentX, currentY, D); //create new ripple at current wrist position
-      ripples.push(newripple); //adding ripple to array
+   // console.log(poses[0]);
+    let leftWrist = poses[0].left_wrist; //getting left wrist position
+    if (poses[0].left_wrist && poses[0].left_wrist.confidence > 0.05) { // *add && condition for confidence
+      // I first used poses[0] itself, which is not a position.
+      // poses[0] is the first detected person，keypoints[9] is the left wrist keypoint.
+      // .position gets the position object with x and y properties.
+      let currentX = leftWrist.x;
+      let currentY = leftWrist.y;
+      //updatse previous left wrist positions for next frame
+      let D = dist(currentX, currentY, prevLeftWristX, prevLeftWristY); //calculate distance moved since last frame
+      //console.log("Wrist moved distance: " + D);
+      if (D > speedThreshold && millis() > lastLeftRippleTime + rippleCD) {
+        //if distance moved is greater than threshold and cooldown time has passed
+        let newripple = new Ripple(currentX, currentY, D); //create new ripple at current wrist position
+        ripples.push(newripple); //adding ripple to array
+        lastLeftRippleTime = millis(); //update last left ripple creation time
+      }
+      prevLeftWristX = currentX;
+      prevLeftWristY = currentY;
+      //this two line of code ensure that in the next frame, we can calculate the distance moved again
     }
-    prevLeftWristX = currentX;
-    prevLeftWristY = currentY;
-    //this two line of code ensure that in the next frame, we can calculate the distance moved again
+    
+    //Same for the right hand
+    let rightWrist = poses[0].right_wrist; //getting right wrist position
+    if (poses[0].right_wrist && poses[0].right_wrist.confidence > 0.05) { // *add && condition for confidence
+      let currentX = rightWrist.x;
+      let currentY = rightWrist.y;
+      //updatse previous right wrist positions for next frame
+      let D = dist(currentX, currentY, prevRightWristX, prevRightWristY); //calculate distance moved since last frame
+      if (D > speedThreshold && millis() > lastRightRippleTime + rippleCD) {
+        //if distance moved is greater than threshold and cooldown time has passed
+        let newripple = new Ripple(currentX, currentY, D); //create new ripple at current wrist position
+        ripples.push(newripple); 
+        lastRightRippleTime = millis(); 
+      }
+      prevRightWristX = currentX;
+      prevRightWristY = currentY;
+    }
   }
-  //
-  for (let i = ripples.length -1; i >=0; i--){
-    ripples[i].display(); 
-    if (ripples[i].isFinished()){
+
+  // this loop goes backwards, controlling the display and removal of ripples
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    //for each ripple in the array, go backwards by i.
+    ripples[i].display();
+    if (ripples[i].isFinished()) {
       // splice function is used to remove elements from an array.
       // p5js reference: https://p5js.org/reference/#/p5.Array/splice
       // in this case, when a ripple is finished (alpha <=0), will remove it from the array
@@ -60,35 +105,35 @@ function draw() {
   }
 }
 
-function gotPoses(results){ //storing the detected poses
-  poses = results;
-  console.log("Pose Detected!");
-}
-
-//creating the Ripple class. 
+//creating the Ripple class.
 class Ripple {
   //Identifying the properties of a ripple.
-  constructor(x, y, initialSpeed) { //the center posistion x,y, and the force of the ripple (speed)
+  constructor(x, y, initialSpeed) {
+    //the center posistion x,y, and the force of the ripple (speed)
     this.x = x;
     this.y = y;
     this.r = 0; //the radius starts from 0
     this.alpha = 255; //initial alpha value, from 0-255
-    
-    this.rGrowSpeed = map(initialSpeed, 0, 50, 2, 10); 
+
+    this.rGrowSpeed = map(initialSpeed, 0, 20, 2, 5);
     //the growth speed of the radius, mapped from the initialSpeed,
     //faster the initial speed, faster the growth speed
   }
-  
+
   display() {
     if (this.alpha <= 0) {
       return; //if alpha is 0 or less, do not display the ripple
     }
     noFill();
     stroke(255, this.alpha); //a white stroke with the current alpha value
-    strokeWeight(3);
+    
+    //the water ripple stokr should fade out as it expand.
+    //Alpha is used to determine the stroke weight here. Since farther it go less the alpha.
+    let currentWeight = map(this.alpha, 0, 255, 1, 10);
+    strokeWeight(currentWeight); 
     ellipse(this.x, this.y, this.r * 2);
     this.r += this.rGrowSpeed; //increase the radius by the growth speed
-    this.alpha -= 1; //gradually decrease the alpha value to make sure the ripple fades out
+    this.alpha -= 2; //gradually decrease the alpha value to make sure the ripple fades out
   }
 
   isFinished() {
@@ -96,3 +141,7 @@ class Ripple {
   }
 }
 
+function gotPoses(results) {
+  //storing the detected poses
+  poses = results;
+}
