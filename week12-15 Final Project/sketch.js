@@ -19,10 +19,10 @@ let poseML5; //store ml5 pose model
 let poses = []; //store detected poses
 
 // in order to calculate velocity, we need to store previous positions
-let prevLeftWristX = 0; //previous x position of left wrist
-let prevLeftWristY = 0; //previous y position of left wrist
-let prevRightWristX = 0; //previous x position of right wrist
-let prevRightWristY = 0; //previous y position of right wrist
+let prevLeftWristX = 0; 
+let prevLeftWristY = 0; 
+let prevRightWristX = 0; 
+let prevRightWristY = 0; 
 
 let ripples = []; //array to store ripple objects(from the Ripple class)
 let speedThreshold = 10; //threshold, only create ripple if wrist speed exceeds this value
@@ -48,12 +48,15 @@ function setup() {
 
 function draw() {
   background(0);
+  translate(width, 0); //mirror the video
+  scale(-1, 1);
   image(video, 0, 0, width, height);
 
   if (poses.length > 0) {
    // console.log(poses[0]);
     let leftWrist = poses[0].left_wrist; //getting left wrist position
-    if (poses[0].left_wrist && poses[0].left_wrist.confidence > 0.05) { // *add && condition for confidence
+    if (poses[0].left_wrist && // check if left wrist is detected
+        poses[0].left_wrist.confidence > 0.05) { // condition to check confidence level
       // I first used poses[0] itself, which is not a position.
       // poses[0] is the first detected person，keypoints[9] is the left wrist keypoint.
       // .position gets the position object with x and y properties.
@@ -62,8 +65,8 @@ function draw() {
       //updatse previous left wrist positions for next frame
       let D = dist(currentX, currentY, prevLeftWristX, prevLeftWristY); //calculate distance moved since last frame
       //console.log("Wrist moved distance: " + D);
-      if (D > speedThreshold && millis() > lastLeftRippleTime + rippleCD) {
-        //if distance moved is greater than threshold and cooldown time has passed
+      if (D > speedThreshold && //if distance moved is greater than threshold and cooldown time has passed
+          millis() > lastLeftRippleTime + rippleCD) {  // doesn current time - last ripple time > cooldown time
         let newripple = new Ripple(currentX, currentY, D); //create new ripple at current wrist position
         ripples.push(newripple); //adding ripple to array
         lastLeftRippleTime = millis(); //update last left ripple creation time
@@ -75,12 +78,14 @@ function draw() {
     
     //Same for the right hand
     let rightWrist = poses[0].right_wrist; //getting right wrist position
-    if (poses[0].right_wrist && poses[0].right_wrist.confidence > 0.05) { // *add && condition for confidence
+    if (poses[0].right_wrist && 
+        poses[0].right_wrist.confidence > 0.05) { // *add && condition for confidence
       let currentX = rightWrist.x;
       let currentY = rightWrist.y;
       //updatse previous right wrist positions for next frame
       let D = dist(currentX, currentY, prevRightWristX, prevRightWristY); //calculate distance moved since last frame
-      if (D > speedThreshold && millis() > lastRightRippleTime + rippleCD) {
+      if (D > speedThreshold && 
+          millis() > lastRightRippleTime + rippleCD) {
         //if distance moved is greater than threshold and cooldown time has passed
         let newripple = new Ripple(currentX, currentY, D); //create new ripple at current wrist position
         ripples.push(newripple); 
@@ -93,7 +98,7 @@ function draw() {
 
   // this loop goes backwards, controlling the display and removal of ripples
   for (let i = ripples.length - 1; i >= 0; i--) {
-    //for each ripple in the array, go backwards by i.
+    //the loop means start from the last element of the array to the first element
     ripples[i].display();
     if (ripples[i].isFinished()) {
       // splice function is used to remove elements from an array.
@@ -115,7 +120,7 @@ class Ripple {
     this.r = 0; //the radius starts from 0
     this.alpha = 255; //initial alpha value, from 0-255
 
-    this.rGrowSpeed = map(initialSpeed, 0, 20, 2, 5);
+    this.rGrowSpeed = map(initialSpeed, 0, 20, 1, 4);
     //the growth speed of the radius, mapped from the initialSpeed,
     //faster the initial speed, faster the growth speed
   }
@@ -129,7 +134,7 @@ class Ripple {
     
     //the water ripple stokr should fade out as it expand.
     //Alpha is used to determine the stroke weight here. Since farther it go less the alpha.
-    let currentWeight = map(this.alpha, 0, 255, 1, 10);
+    let currentWeight = map(this.alpha, 0, 255, 1, 20);
     strokeWeight(currentWeight); 
     ellipse(this.x, this.y, this.r * 2);
     this.r += this.rGrowSpeed; //increase the radius by the growth speed

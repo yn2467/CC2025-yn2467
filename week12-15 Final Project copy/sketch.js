@@ -24,11 +24,11 @@ function setup() {
 
 function draw() {
   image(video, 0, 0, width, height);
-  loadPixels();
 
   if (poses.length > 0) {
     if (poses[0].left_wrist) {
       let leftWrist = poses[0].left_wrist;
+      console.log(leftWrist);
       let currentX = leftWrist.x;
       let currentY = leftWrist.y;
 
@@ -36,6 +36,14 @@ function draw() {
       if (D > speedThreshold) {
         let newripple = new Ripple(currentX, currentY, D);
         ripples.push(newripple);
+        console.log(
+          "New ripple created at (" +
+            currentX +
+            ", " +
+            currentY +
+            ") with speed " +
+            D
+        );
       }
 
       prevLeftWristX = currentX;
@@ -44,13 +52,11 @@ function draw() {
   }
 
   for (let i = ripples.length - 1; i >= 0; i--) {
-    ripples[i].applyWaveDistortion(pixels, width, height);
+    ripples[i].display();
     if (ripples[i].isFinished()) {
       ripples.splice(i, 1);
     }
   }
-
-  updatePixels();
 }
 
 class Ripple {
@@ -59,47 +65,20 @@ class Ripple {
     this.y = y;
     this.r = 0;
     this.alpha = 255;
+
     this.rGrowSpeed = map(initialSpeed, 0, 20, 2, 10);
   }
 
-  applyWaveDistortion(pixels, w, h) {
-    let originalPixels = pixels.slice();
-
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        let dx = x - this.x;
-        let dy = y - this.y;
-        let distToWave = sqrt(dx * dx + dy * dy);
-
-        let waveWidth = 60;
-        let distFromWave = abs(distToWave - this.r);
-
-        if (distFromWave < waveWidth && distToWave > 0) {
-          let waveStrength = (1 - distFromWave / waveWidth) * (this.alpha / 255);
-          let displacement = sin((distToWave - this.r) / waveWidth * PI) * waveStrength * 25;
-
-          let angle = atan2(dy, dx);
-          let newX = x + cos(angle) * displacement;
-          let newY = y + sin(angle) * displacement;
-
-          newX = constrain(newX, 0, w - 1);
-          newY = constrain(newY, 0, h - 1);
-
-          let sourceIndex = (floor(newY) * w + floor(newX)) * 4;
-          let targetIndex = (y * w + x) * 4;
-
-          if (sourceIndex >= 0 && sourceIndex < originalPixels.length - 3) {
-            pixels[targetIndex] = lerp(originalPixels[targetIndex], originalPixels[sourceIndex], waveStrength * 0.8);
-            pixels[targetIndex + 1] = lerp(originalPixels[targetIndex + 1], originalPixels[sourceIndex + 1], waveStrength * 0.8);
-            pixels[targetIndex + 2] = lerp(originalPixels[targetIndex + 2], originalPixels[sourceIndex + 2], waveStrength * 0.8);
-            pixels[targetIndex + 3] = originalPixels[targetIndex + 3];
-          }
-        }
-      }
+  display() {
+    if (this.alpha <= 0) {
+      return;
     }
-
+    noFill();
+    stroke(255, this.alpha);
+    strokeWeight(3);
+    ellipse(this.x, this.y, this.r * 2);
     this.r += this.rGrowSpeed;
-    this.alpha -= 2;
+    this.alpha -= 1;
   }
 
   isFinished() {
